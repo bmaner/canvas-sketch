@@ -3,7 +3,7 @@ const random = require("canvas-sketch-util/random");
 
 const settings = {
   dimensions: [1080, 1080],
-  animation: true,
+  // animation: true,
 };
 
 let manager;
@@ -18,7 +18,7 @@ const typeCanvas = document.createElement("canvas");
 const typeContext = typeCanvas.getContext("2d");
 
 const sketch = ({ context, width, height }) => {
-  const cell = 5;
+  const cell = 1;
   const cols = Math.floor(width / cell);
   const rows = Math.floor(height / cell);
   const numCells = cols * rows;
@@ -38,7 +38,6 @@ const sketch = ({ context, width, height }) => {
     typeContext.drawImage(sketchImg, 0, 0, cols, rows);
 
     // const metrics = typeContext.measureText(text);
-    const imgData = typeContext.getImageData(0, 0, cols, rows).data;
     // console.log(metrics);
     // const mx = metrics.actualBoundingBoxLeft * -1;
     // const my = metrics.actualBoundingBoxAscent * -1;
@@ -87,7 +86,7 @@ const sketch = ({ context, width, height }) => {
       context.font = `${cell}px ${fontFamily}`;
       if (Math.random() < 0.1) context.font = `${cell * 2}px ${fontFamily}`;
 
-      context.fillStyle = `rgb(${r},${g},${b})`;
+      context.fillStyle = `rgb(${r},${g},${b},${a})`;
       // context.fillStyle = `white`;
 
       context.save();
@@ -105,11 +104,12 @@ const sketch = ({ context, width, height }) => {
   };
 };
 
-const getGlyph = (v) => {
-  if (v < 50) return "";
-  if (v < 100) return ".";
-  if (v < 150) return "-";
-  if (v < 200) return "*";
+const getGlyph = (r, g, b, a) => {
+  const brightness = (r + g + b) / 3;
+  if (brightness < 50) return "";
+  if (brightness < 100) return ".";
+  if (brightness < 150) return "-";
+  if (brightness < 200) return "*";
 
   const glyphs = "_ =/".split("");
 
