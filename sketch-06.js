@@ -3,6 +3,7 @@ const random = require("canvas-sketch-util/random");
 
 const settings = {
   dimensions: [1080, 1080],
+  animation: true,
 };
 
 let manager;
@@ -10,12 +11,14 @@ let manager;
 let text = "A";
 let fontSize = 1200;
 let fontFamily = "serif";
+let url = "./assets/img3.jpg";
+let sketchImg;
 
 const typeCanvas = document.createElement("canvas");
 const typeContext = typeCanvas.getContext("2d");
 
 const sketch = ({ context, width, height }) => {
-  const cell = 20;
+  const cell = 5;
   const cols = Math.floor(width / cell);
   const rows = Math.floor(height / cell);
   const numCells = cols * rows;
@@ -27,32 +30,34 @@ const sketch = ({ context, width, height }) => {
     typeContext.fillStyle = "black";
     typeContext.fillRect(0, 0, cols, rows);
 
-    fontSize = cols * 1.2;
+    // fontSize = cols * 1.2;
 
-    typeContext.fillStyle = "white";
-    typeContext.font = `${fontSize}px ${fontFamily}`;
-    typeContext.textBaseline = "top";
+    // typeContext.fillStyle = "white";
+    // typeContext.font = `${fontSize}px ${fontFamily}`;
+    // typeContext.textBaseline = "top";
+    typeContext.drawImage(sketchImg, 0, 0, cols, rows);
 
-    const metrics = typeContext.measureText(text);
-    console.log(metrics);
-    const mx = metrics.actualBoundingBoxLeft * -1;
-    const my = metrics.actualBoundingBoxAscent * -1;
-    const mw = metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight;
-    const mh =
-      metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+    // const metrics = typeContext.measureText(text);
+    const imgData = typeContext.getImageData(0, 0, cols, rows).data;
+    // console.log(metrics);
+    // const mx = metrics.actualBoundingBoxLeft * -1;
+    // const my = metrics.actualBoundingBoxAscent * -1;
+    // const mw = metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight;
+    // const mh =
+    //   metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
 
-    const tx = (cols - mw) * 0.5 - mx;
-    const ty = (rows - mh) * 0.5 - my;
+    // const tx = (cols - mw) * 0.5 - mx;
+    // const ty = (rows - mh) * 0.5 - my;
 
-    typeContext.save();
-    typeContext.translate(tx, ty);
+    // typeContext.save();
+    // typeContext.translate(tx, ty);
 
-    typeContext.beginPath();
-    typeContext.rect(mx, my, mw, mh);
-    typeContext.stroke();
+    // typeContext.beginPath();
+    // typeContext.rect(mx, my, mw, mh);
+    // typeContext.stroke();
 
-    typeContext.fillText(text, 0, 0);
-    typeContext.restore();
+    // typeContext.fillText(text, 0, 0);
+    // typeContext.restore();
 
     const typeData = typeContext.getImageData(0, 0, cols, rows).data;
 
@@ -76,13 +81,14 @@ const sketch = ({ context, width, height }) => {
       const b = typeData[i * 4 + 2];
       const a = typeData[i * 4 + 3];
 
-      const glyph = getGlyph(r);
+      // const glyph = getGlyph(r);
+      const glyph = getGlyph(r, g, b, a);
 
-      context.font = `${cell * 2}px ${fontFamily}`;
-      if (Math.random() < 0.1) context.font = `${cell * 6}px ${fontFamily}`;
+      context.font = `${cell}px ${fontFamily}`;
+      if (Math.random() < 0.1) context.font = `${cell * 2}px ${fontFamily}`;
 
-      // context.fillStyle = `rgb(${r},${g},${b})`;
-      context.fillStyle = `white`;
+      context.fillStyle = `rgb(${r},${g},${b})`;
+      // context.fillStyle = `white`;
 
       context.save();
       context.translate(x, y);
@@ -103,7 +109,7 @@ const getGlyph = (v) => {
   if (v < 50) return "";
   if (v < 100) return ".";
   if (v < 150) return "-";
-  if (v < 200) return "hotseller";
+  if (v < 200) return "*";
 
   const glyphs = "_ =/".split("");
 
@@ -117,7 +123,17 @@ const onKeyUp = (e) => {
 
 document.addEventListener("keyup", onKeyUp);
 
+const loadImage = (url) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject();
+    img.src = url;
+  });
+};
+
 const start = async () => {
+  sketchImg = await loadImage(url);
   manager = await canvasSketch(sketch, settings);
 };
 
